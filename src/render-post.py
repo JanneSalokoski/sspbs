@@ -35,9 +35,14 @@ def parse_arguments():
 
     return parser.parse_args()
 
+def get_template():
+    print("Template!")
+
 def main():
     config = parse_arguments()
     logger.info(f"Rendering post '{config.input}'")
+
+    template = get_template()
 
 
 if __name__ == "__main__":
