@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+
+    <title>How to bulk unfollow on Duolingo?</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="syntax.css">
+
+    <script src="blog.js"></script>
+  </head>
+  <body id="body">
+    <header>
+      <div class="nav">
+        <ul>
+          <li class="sitelogo">jsal.eu/</li>
+          <li><a href="">Home</a></li>
+          <li class="active"><a href="">Blog</a></li>
+          <li><a href="">CV</a></li>
+          <li><a href="">Contact</a></li>
+          <li class="switch" onclick="toggle_colorscheme()"></li>
+        </ul>
+      </div>
+    </header>
+    <main>
+      <div class="post-title">
+        <h1>How to bulk unfollow on Duolingo?</h1>
+      </div>
+      <div class="post-info">
+        <div class="post-info-item date">
+          15.11.2023
+        </div>
+        <div class="post-info-item tags">
+          <span class="tag">development</span>
+          <span class="tag">hacking</span>
+        </div>
+      </div>
+      <div class="blog-post">
+<h2>The boring part: some background</h2>
+<p>Like probably all of us, I registered on Duolingo years ago, forgot about it and have restarted using it periodically a few times ever since. Now for the latest time, my so and I started learning Spanish on Duolingo 44 days ago (my greatest streak yet!). We have been enjoying the friends quest feature, where we can work together to complete lessons and receive a price at the end. Here comes the problem: Duolingo doesn't always allow me to choose my friends quest partner.</p>
+<p>That might not seem so bad: you probably follow a fiew schoolmates and work friends. If you absolutely don't want to play with them, just go through their profiles and remove them. Not in my case. I followed a total of <strong>319 people</strong>. I suspect that my account had been <em>hacked</em>, or just accessed because I had been using a generic password that has been leaked in a few password leaks. I just didn't care about my Duolingo gems enough to change the password or even check if it has been accessed. (Now it has been changed to a secure one!)</p>
+<p>I noticed the amount of friends this time when I started playing, but there is no mass-unfollow -option, so I didn't bother clicking through all the profiles. Duolingo loads the profile pages very slowly and you can't unsubscribe from anywhere else than the profile page. So in order to be able to play the friends quest only with my girlfriend and not a bunch of random people, I had to find an easier way! I also had sent Duolingo a support request about this, but have received no answer.</p>
+<h2>The problem</h2>
+<p>I need to unfollow 319 people on duolingo. Only way Duolingo provides me, is to click through all of their profiles and unfollow there. The UI is quite slow, so I want to hack it a little.</p>
+<h2>What happens when you unfollow a person, and can you replicate it</h2>
+<p>If you open up duolingo in a browser and go to your profile page, you can see a list of people you are following. From devtools or just clicking a profile, you can see that you are taken to the address: <code>https://duolingo.com/u/&lt;id&gt;</code>. That is forwarded to <code>https://duolingo/profile/&lt;profilename&gt;</code>. Can we do something with these? Probably, but let's see what happens when I click the ´following´ button.</p>
+<p><img alt="Duolingo profile page with devtools open, inspecting the 'following' button" src="res/duolingo-unfollow-1.png" /></p>
+<p>From devtools I see by inspecting the button element that there are quite a few event handlers on the button, and they lead to cryptic anonymoys functions which are hard to follow. I think I could have found out what happens by following the code, but first I decided to check the network profiler when I click the button.</p>
+<p><img alt="Chrome devtools network-profiler showing a DELETE request to unfollow a profile" src="res/duolingo-unfollow-2.png" /></p>
+<p>Jackpot! There is a <code>DELETE</code> request on <code>https://www.duolingo.com/2017-06-30/friends/users/&lt;my-user-id&gt;/follow/&lt;their-user-id&gt;</code></p>
+<p>I followed the person again, and ran <code>await fetch("https://www.duolingo.com/2017-06-30/friends/users/&lt;my-user-id&gt;/follow/&lt;their-user-id&gt;", {method: "DELETE"})</code> from the developer console, which succeeded! After refreshing the page, I did not anymore appear to follow them. No problems with authentication because my browser was already authenticated.</p>
+<h3>Can I do this <em>en masse</em>?</h3>
+<p>Remember earlier when I said that on your profile page you can see from devtools that the followed profiles link to <code>https://duolingo.com/u/&lt;id&gt;</code>? That's amazing, because I could go to my profile page, copy the outer html of the div containing followed profiles, and grep all the links. I did this by copying the raw html to sublime text, copying all matches for <code>duolingo.com/u/.+?"</code> to a new window and replacing <code>duolingo.com/u/</code> with a <code>"</code>. Then I just needed to append commas to all the lines except the last one, and turn it into an Array like this:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;&lt;id-1&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;&lt;id-2&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;&lt;id-3&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="s2">&quot;&lt;id-319&gt;&quot;</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<p>Which I could just paste into the developer console. Then I could reate an async function for unfollowing and id:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">unfollow</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`https://duolingo.com/2017-06-30/friends/users/&lt;my-user-id&gt;/follow/</span><span class="si">${</span><span class="nx">id</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;DELETE&quot;</span><span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>And just execute the function for each of them</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">ids</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">unfollow</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">})</span>
+</code></pre></div>
+
+<p>And somewhat miraclously this actually worked. I refreshed the page and there was only one person, but after clicking their profile I didn't see them either anymore. My following-count was 24 for some reason, but that cahce had expired by this morning, and now everything is good!</p>
+<h3>Follow-up</h3>
+<p>I really didn't think this would be so easy. I thought there would for sure be some auth problems or that duolingo would ban me for hitting the API 300 times in a second. But no, it just worked. And all of this took me like 15 minutes, which must be a personal best. Usually these kinds of ideas become weekend-long projects that end up abandoned after a week or so.</p>
+<p>I'm not sure if this will be helpfull for anyone, but maybe it will, or maybe someone learns a thing or two. This technique might work on other sites as well. So if you have a profile that has been accessed at one point that has been farming xp for someone else, maybe go and try if you could stop that this easily.</p>
+<p>Happy hacking!</p>
+        <body>
+        </html>
+      </div>
+    </main>
+  </body>
+</html>

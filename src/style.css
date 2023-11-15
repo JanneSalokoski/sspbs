@@ -79,9 +79,12 @@ main {
   margin-top: calc(var(--padding-large) * 2);
 
   max-width: 60em;
-  width: calc(100vw - (var(--padding-large) * 2));
+  width: calc(100vw - (var(--padding-large) * 6));
   margin-left: auto;
   margin-right: auto;
+
+  padding-left: calc(var(--padding-large) * 2);
+  padding-right: calc(var(--padding-large) * 2);
 }
 
 .post-title h1 {
@@ -105,6 +108,47 @@ main {
   border-radius: var(--border-radius);
 }
 
+.blog-post h1, .blog-post h2, .blog-post h3 {
+  margin-top: var(--padding-large);
+  margin-bottom: var(--padding-normal);
+}
+
+.blog-post p {
+  margin-bottom: var(--padding-normal);
+}
+
+.blog-post img {
+  width: calc(100% - (var(--padding-large) * 2));
+  padding-left: var(--padding-large);
+  padding-right: var(--padding-large);
+
+  margin: var(--padding-large) auto var(--padding-large) auto;
+
+  border-radius: var(--border-radius);
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10pt;
+}
+
+p > code {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  border-radius: var(--border-radius);
+}
+
+.codehilite {
+  overflow-x: auto;
+  padding: var(--padding-normal);
+  margin: var(--padding-large) auto var(--padding-large) auto;
+
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
 body.dark {
   --color-fg: #f4ede8;
   --color-bg: #22223b;
@@ -122,4 +166,9 @@ body.dark .nav {
 
 body.dark .nav .switch:after {
   content: "🌙";
+}
+
+body.dark p > code {
+  background-color: var(--color-accent);
+  color: var(--color-fg);
 }
