@@ -105,3 +105,21 @@ main {
   border-radius: var(--border-radius);
 }
 
+body.dark {
+  --color-fg: #f4ede8;
+  --color-bg: #22223b;
+}
+
+body.dark .nav {
+  --color-temp: var(--color-fg);
+  --color-fg: var(--color-bg);
+  --color-bg: var(--color-temp);
+}
+
+.nav .switch:after {
+  content: "☀️";
+}
+
+body.dark .nav .switch:after {
+  content: "🌙";
+}
