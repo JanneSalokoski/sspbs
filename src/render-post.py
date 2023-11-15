@@ -1,5 +1,6 @@
 #!/bin/env py
 
+import argparse
 import markdown
 import logging
 import os
@@ -23,8 +24,21 @@ logfile.setFormatter(logfile_formatter)
 logger.addHandler(stream)
 logger.addHandler(logfile)
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        prog="render-post.py",
+        description="Renders a markdown post to html"
+    )
+
+    parser.add_argument("input")
+    parser.add_argument("-o", "--output")
+
+    return parser.parse_args()
+
 def main():
-    logger.info("Starting 'render-post.py'")
+    config = parse_arguments()
+    logger.info(f"Rendering post '{config.input}'")
+
 
 if __name__ == "__main__":
     main()
